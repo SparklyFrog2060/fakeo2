@@ -1,0 +1,17 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "o2-logo",
+      "description": "O2 Mail Logo",
+      "imageUrl": "https://picsum.photos/seed/o2logo/200/80",
+      "imageHint": "logo blue"
+    },
+    {
+      "id": "o2-marketing",
+      "description": "Marketing image for webmail",
+      "imageUrl": "https://picsum.photos/seed/o2marketing/600/800",
+      "imageHint": "technology mail"
+    }
+  ]
+}
