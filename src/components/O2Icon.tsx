@@ -11,8 +11,8 @@ export function O2Icon({ className }: { className?: string }) {
       <Image 
         src={o2Logo} 
         alt="o2" 
-        width={64} 
-        height={32} 
+        width={32} 
+        height={16} 
         className="object-contain"
         priority
       />
