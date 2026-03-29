@@ -92,7 +92,7 @@ export function O2Login() {
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-white">
       {/* Left Sidebar */}
-      <div className="w-full md:w-[340px] flex flex-col border-r min-h-screen bg-white shadow-2xl z-20">
+      <div className="w-full md:w-[320px] flex flex-col border-r min-h-screen bg-white shadow-2xl z-20">
         {/* Top Bar with Logo and Shadow */}
         <div className="h-14 flex items-center justify-between px-4 border-b bg-white shadow-sm shrink-0">
           <button className="text-[#002aff] hover:bg-blue-50 p-1 rounded-full transition-colors">
@@ -107,7 +107,7 @@ export function O2Login() {
         <div className="flex-1 flex flex-col p-6 space-y-6 overflow-y-auto">
           <div className="space-y-1">
             <h2 className="text-xl font-bold text-gray-800">Zaloguj się</h2>
-            <p className="text-[11px] text-gray-400">Wprowadź swoje dane, aby kontynuować</p>
+            <p className="text-[10px] text-gray-400">Wprowadź swoje dane, aby kontynuować</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -132,56 +132,55 @@ export function O2Login() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-gray-400 hover:text-[#002aff] uppercase tracking-wider"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-gray-400 hover:text-[#002aff] uppercase tracking-wider"
                 >
                   {showPassword ? "UKRYJ" : "POKAŻ"}
                 </button>
               </div>
             </div>
 
-            {/* Enlarged Dark Cloudflare Widget */}
+            {/* Cloudflare Widget Dark */}
             <div 
-              className={`bg-[#313131] border border-transparent p-3.5 min-h-[75px] rounded-sm flex items-center justify-between transition-all duration-300 ${cfStatus === 'ready' ? 'cursor-pointer hover:bg-[#3a3a3a]' : 'cursor-default'}`}
+              className={`bg-[#313131] border border-transparent p-3 min-h-[70px] rounded-sm flex items-center justify-between transition-all duration-300 ${cfStatus === 'ready' ? 'cursor-pointer hover:bg-[#3a3a3a]' : 'cursor-default'}`}
               onClick={handleCloudflareClick}
             >
-              <div className="flex items-center gap-4">
-                <div className="w-9 h-9 flex items-center justify-center relative">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 flex items-center justify-center relative">
                   {(cfStatus === 'initial' || cfStatus === 'verifying') && (
-                    <Loader2 className="w-7 h-7 text-white animate-spin" />
+                    <Loader2 className="w-6 h-6 text-white animate-spin" />
                   )}
                   {cfStatus === 'ready' && (
-                    <div className="w-6 h-6 border-2 border-gray-500 bg-transparent rounded-sm shadow-inner" />
+                    <div className="w-5 h-5 border-2 border-gray-500 bg-transparent rounded-sm" />
                   )}
                   {cfStatus === 'verified' && (
-                    <div className="bg-[#22c55e] rounded-full p-1 animate-in zoom-in duration-300">
-                      <CheckCircle2 className="w-7 h-7 text-white fill-[#22c55e]" />
+                    <div className="bg-[#22c55e] rounded-full p-0.5 animate-in zoom-in duration-300">
+                      <CheckCircle2 className="w-6 h-6 text-white fill-[#22c55e]" />
                     </div>
                   )}
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[12px] font-semibold text-white leading-tight">
-                    {cfStatus === 'initial' && 'Weryfikuję...'}
+                  <span className="text-[11px] font-semibold text-white leading-tight">
+                    {(cfStatus === 'initial' || cfStatus === 'verifying') && 'Weryfikuję...'}
                     {cfStatus === 'ready' && 'Jestem człowiekiem'}
-                    {cfStatus === 'verifying' && 'Weryfikuję...'}
                     {cfStatus === 'verified' && 'Powodzenie!'}
                   </span>
                   {cfStatus !== 'verified' && (
-                    <span className="text-[9px] text-gray-400 leading-tight">I am human</span>
+                    <span className="text-[8px] text-gray-400 leading-tight">I am human</span>
                   )}
                 </div>
               </div>
               
               <div className="flex flex-col items-end shrink-0">
-                <div className="flex items-center gap-1.5">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <div className="flex items-center gap-1">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 3C7.03 3 3 7.03 3 12C3 16.97 7.03 21 12 21C16.97 21 21 16.97 21 12C21 7.03 16.97 3 12 3ZM12 19.5C7.86 19.5 4.5 16.14 4.5 12C4.5 7.86 7.86 4.5 12 4.5C16.14 4.5 19.5 7.86 19.5 12C19.5 16.14 16.14 19.5 12 19.5Z" fill="#F48120"/>
                     <path d="M16.5 10.5C16.5 12.98 14.48 15 12 15C9.52 15 7.5 12.98 7.5 10.5C7.5 8.02 9.52 6 12 6C14.48 6 16.5 8.02 16.5 10.5Z" fill="#F48120"/>
                   </svg>
-                  <span className="text-[10px] font-black text-white tracking-widest uppercase">Cloudflare</span>
+                  <span className="text-[9px] font-black text-white tracking-widest uppercase">Cloudflare</span>
                 </div>
-                <div className="flex gap-2 mt-1">
-                  <button type="button" className="text-[9px] text-gray-300 underline hover:text-white">Prywatność</button>
-                  <button type="button" className="text-[9px] text-gray-300 underline hover:text-white">Pomoc</button>
+                <div className="flex gap-2 mt-0.5">
+                  <button type="button" className="text-[8px] text-gray-300 underline hover:text-white">Prywatność</button>
+                  <button type="button" className="text-[8px] text-gray-300 underline hover:text-white">Pomoc</button>
                 </div>
               </div>
             </div>
@@ -199,7 +198,7 @@ export function O2Login() {
             <a href="#" className="text-[11px] font-bold text-blue-600 hover:underline">Nie pamiętasz hasła?</a>
             <div className="relative">
               <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-gray-100" /></div>
-              <div className="relative flex justify-center text-[9px] uppercase font-bold tracking-[0.1em]"><span className="bg-white px-3 text-gray-300">lub zaloguj się przez</span></div>
+              <div className="relative flex justify-center text-[8px] uppercase font-bold tracking-[0.1em]"><span className="bg-white px-3 text-gray-300">lub zaloguj się przez</span></div>
             </div>
             
             <div className="flex justify-center gap-5">
@@ -219,7 +218,7 @@ export function O2Login() {
               </button>
             </div>
             
-            <a href="#" className="block text-blue-600 font-bold text-[13px] hover:underline">Załóż nowe konto</a>
+            <a href="#" className="block text-blue-600 font-bold text-[12px] hover:underline">Załóż nowe konto</a>
           </div>
 
           <div className="mt-auto pt-4 text-[9px] text-gray-400 space-y-1 text-center font-medium">
