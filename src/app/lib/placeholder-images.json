@@ -4,14 +4,26 @@
     {
       "id": "o2-logo",
       "description": "O2 Mail Logo",
-      "imageUrl": "https://picsum.photos/seed/o2logo/200/80",
+      "imageUrl": "https://picsum.photos/seed/o2logo/120/50",
+      "imageHint": "logo o2"
+    },
+    {
+      "id": "wp-illustration",
+      "description": "WP activity illustration",
+      "imageUrl": "https://picsum.photos/seed/wpillus/500/400",
+      "imageHint": "isometric phone"
+    },
+    {
+      "id": "partner-logo-1",
+      "description": "Partner Nocowanie",
+      "imageUrl": "https://picsum.photos/seed/partner1/150/50",
       "imageHint": "logo blue"
     },
     {
-      "id": "o2-marketing",
-      "description": "Marketing image for webmail",
-      "imageUrl": "https://picsum.photos/seed/o2marketing/600/800",
-      "imageHint": "technology mail"
+      "id": "partner-logo-2",
+      "description": "Partner O2",
+      "imageUrl": "https://picsum.photos/seed/partner2/150/50",
+      "imageHint": "logo pink"
     }
   ]
 }
