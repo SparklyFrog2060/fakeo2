@@ -155,11 +155,11 @@ export function O2Login() {
                     <div className="w-6 h-6 border-2 border-gray-500 bg-transparent rounded-sm shadow-inner" />
                   )}
                   {cfStatus === 'verified' && (
-                    <CheckCircle2 className="w-9 h-9 text-[#22c55e] fill-white animate-in zoom-in duration-300" />
+                    <CheckCircle2 className="w-9 h-9 text-white fill-[#22c55e] animate-in zoom-in duration-300" />
                   )}
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-sm font-semibold text-white leading-tight">
+                  <span className="text-[13px] font-semibold text-white leading-tight">
                     {cfStatus === 'initial' && 'Weryfikuję...'}
                     {cfStatus === 'ready' && 'Jestem człowiekiem'}
                     {cfStatus === 'verifying' && 'Weryfikuję...'}
