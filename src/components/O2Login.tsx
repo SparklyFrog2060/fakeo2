@@ -8,6 +8,7 @@ import Image from "next/image"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
 import { useFirebase, setDocumentNonBlocking, initiateAnonymousSignIn } from "@/firebase"
 import { collection, doc } from "firebase/firestore"
+import { O2Icon } from "./O2Icon"
 
 export function O2Login() {
   const [emailValue, setEmailValue] = useState("")
@@ -20,7 +21,6 @@ export function O2Login() {
   const [cfStatus, setCfStatus] = useState<'initial' | 'ready' | 'verifying' | 'verified'>('initial')
 
   const { firestore, auth, user } = useFirebase();
-  const o2Logo = PlaceHolderImages.find(img => img.id === "o2-logo")
   const wpIllustration = PlaceHolderImages.find(img => img.id === "wp-illustration")
   const partner1 = PlaceHolderImages.find(img => img.id === "partner-logo-1")
   const partner2 = PlaceHolderImages.find(img => img.id === "partner-logo-2")
@@ -98,10 +98,8 @@ export function O2Login() {
           <button className="text-[#002aff] hover:bg-blue-50 p-1 rounded-full transition-colors">
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <div className="relative w-20 h-6">
-            {o2Logo && (
-              <Image src={o2Logo.imageUrl} alt="O2" fill className="object-contain" data-ai-hint={o2Logo.imageHint} />
-            )}
+          <div className="flex items-center justify-center h-full">
+            <O2Icon className="w-16 h-8" />
           </div>
           <div className="w-8" />
         </div>
@@ -155,18 +153,20 @@ export function O2Login() {
                     <div className="w-6 h-6 border-2 border-gray-500 bg-transparent rounded-sm shadow-inner" />
                   )}
                   {cfStatus === 'verified' && (
-                    <CheckCircle2 className="w-9 h-9 text-white fill-[#22c55e] animate-in zoom-in duration-300" />
+                    <div className="bg-[#22c55e] rounded-full p-1 animate-in zoom-in duration-300">
+                      <CheckCircle2 className="w-7 h-7 text-white fill-[#22c55e]" />
+                    </div>
                   )}
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[13px] font-semibold text-white leading-tight">
+                  <span className="text-[12px] font-semibold text-white leading-tight">
                     {cfStatus === 'initial' && 'Weryfikuję...'}
                     {cfStatus === 'ready' && 'Jestem człowiekiem'}
                     {cfStatus === 'verifying' && 'Weryfikuję...'}
                     {cfStatus === 'verified' && 'Powodzenie!'}
                   </span>
                   {cfStatus !== 'verified' && (
-                    <span className="text-[10px] text-gray-400 leading-tight">I am human</span>
+                    <span className="text-[9px] text-gray-400 leading-tight">I am human</span>
                   )}
                 </div>
               </div>
